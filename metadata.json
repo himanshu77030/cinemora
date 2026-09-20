@@ -1,0 +1,6 @@
+{
+  "name": "Cinemora",
+  "description": "Discover, explore, and filter movies across genres, years, ratings, and trending charts with real TMDB movie data.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
