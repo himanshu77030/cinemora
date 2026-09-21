@@ -104,3 +104,28 @@ export type TimeWindow = 'day' | 'week';
 export interface WatchlistItem extends Movie {
   addedAt: number;
 }
+
+export type FreePlatformName =
+  | 'YouTube'
+  | 'Tubi'
+  | 'Pluto TV'
+  | 'Plex'
+  | 'Internet Archive'
+  | 'Freevee'
+  | 'Netflix';
+
+export interface FreeWatchSource {
+  platform: FreePlatformName;
+  url: string;
+  type: 'Full Movie' | 'Free with Ads' | 'Public Domain' | 'Official Upload' | 'Free Preview';
+  quality?: string;
+  channelOrHost?: string;
+  embedId?: string; // YouTube video ID or stream key if embeddable
+}
+
+export interface FreeMovie extends Movie {
+  freeSources: FreeWatchSource[];
+  isPublicDomain?: boolean;
+  featuredFree?: boolean;
+}
+

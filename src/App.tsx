@@ -14,6 +14,7 @@ import { YearMovies } from './pages/YearMovies';
 import { Trending } from './pages/Trending';
 import { TopRated } from './pages/TopRated';
 import { Watchlist } from './pages/Watchlist';
+import { FreeMovies } from './pages/FreeMovies';
 import { Film, Home as HomeIcon } from 'lucide-react';
 
 const ScrollToTop: React.FC = () => {
@@ -59,6 +60,8 @@ export default function App() {
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/free-movies" element={<FreeMovies />} />
+              <Route path="/free" element={<FreeMovies />} />
               <Route path="/movies" element={<Movies />} />
               <Route path="/movie/:id" element={<MovieDetails />} />
               <Route path="/search" element={<Search />} />

@@ -10,7 +10,9 @@ import {
   Grid,
   Menu,
   X,
-  Search
+  Search,
+  Tv,
+  Sparkles
 } from 'lucide-react';
 import { SearchBar } from './SearchBar';
 import { useWatchlist } from '../context/WatchlistContext';
@@ -39,6 +41,7 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { name: 'Home', path: '/' },
+    { name: 'Free Movies', path: '/free-movies', isFree: true },
     { name: 'Movies', path: '/movies' },
     { name: 'Genres', path: '/genres' },
     { name: 'Years', path: '/years' },
@@ -77,14 +80,22 @@ export const Navbar: React.FC = () => {
                 key={link.path}
                 to={link.path}
                 className={({ isActive }) =>
-                  `px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  `px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
                     isActive
                       ? 'text-amber-400 bg-white/10 font-semibold'
+                      : link.isFree
+                      ? 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10'
                       : 'text-neutral-300 hover:text-white hover:bg-white/5'
                   }`
                 }
               >
-                {link.name}
+                <span>{link.name}</span>
+                {link.isFree && (
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-black shadow-sm flex items-center gap-0.5">
+                    <Sparkles className="w-2.5 h-2.5" />
+                    <span>FREE</span>
+                  </span>
+                )}
               </NavLink>
             ))}
           </nav>
@@ -148,14 +159,24 @@ export const Navbar: React.FC = () => {
                 key={link.path}
                 to={link.path}
                 className={({ isActive }) =>
-                  `flex items-center px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  `flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-amber-500/15 text-amber-400 font-bold border border-amber-500/20'
+                      : link.isFree
+                      ? 'text-emerald-400 hover:bg-emerald-500/10'
                       : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                   }`
                 }
               >
-                {link.name}
+                <span className="flex items-center gap-2">
+                  {link.isFree && <Tv className="w-4 h-4 text-emerald-400" />}
+                  <span>{link.name}</span>
+                </span>
+                {link.isFree && (
+                  <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-500 text-black">
+                    FREE
+                  </span>
+                )}
               </NavLink>
             ))}
 
@@ -176,7 +197,7 @@ export const Navbar: React.FC = () => {
       </header>
 
       {/* Floating Bottom Nav for Mobile Convenience */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0c0e15]/95 backdrop-blur-xl border-t border-white/10 px-4 py-2 flex items-center justify-around">
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0c0e15]/95 backdrop-blur-xl border-t border-white/10 px-3 py-2 flex items-center justify-around">
         <NavLink
           to="/"
           className={({ isActive }) =>
@@ -187,6 +208,19 @@ export const Navbar: React.FC = () => {
         >
           <Film className="w-4 h-4" />
           <span>Home</span>
+        </NavLink>
+
+        <NavLink
+          to="/free-movies"
+          className={({ isActive }) =>
+            `relative flex flex-col items-center gap-0.5 text-[10px] font-medium ${
+              isActive ? 'text-emerald-400 font-bold' : 'text-emerald-400/80 hover:text-emerald-300'
+            }`
+          }
+        >
+          <Tv className="w-4 h-4" />
+          <span>Free</span>
+          <span className="absolute -top-1 right-0 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
         </NavLink>
 
         <NavLink
@@ -211,18 +245,6 @@ export const Navbar: React.FC = () => {
         >
           <Flame className="w-4 h-4" />
           <span>Trending</span>
-        </NavLink>
-
-        <NavLink
-          to="/top-rated"
-          className={({ isActive }) =>
-            `flex flex-col items-center gap-0.5 text-[10px] font-medium ${
-              isActive ? 'text-amber-400' : 'text-neutral-400 hover:text-white'
-            }`
-          }
-        >
-          <Star className="w-4 h-4" />
-          <span>Top</span>
         </NavLink>
 
         <NavLink

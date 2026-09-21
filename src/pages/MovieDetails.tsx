@@ -13,7 +13,10 @@ import {
   ArrowLeft,
   Check,
   Film,
-  Users
+  Users,
+  Tv,
+  Sparkles,
+  ExternalLink
 } from 'lucide-react';
 import { Movie, MovieCredits, MovieVideo } from '../types';
 import {
@@ -30,6 +33,8 @@ import { MovieCarousel } from '../components/MovieCarousel';
 import { MovieDetailsSkeleton } from '../components/LoadingSkeleton';
 import { TrailerModal } from '../components/TrailerModal';
 import { setDocumentTitle } from '../utils/seo';
+import { FREE_MOVIES, getFreeStreamingLinksForMovie } from '../data/freeMovies';
+import { FreeWatchBadges } from '../components/FreeWatchBadges';
 
 export const MovieDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -81,7 +86,9 @@ export const MovieDetails: React.FC = () => {
 
           setDocumentTitle(
             `${movieData.title} - Cast, Rating, Trailer & Details | Cinemora`,
-            movieData.overview || `Discover full cast, crew, trailers, and ratings for ${movieData.title}.`
+            movieData.overview ||
+              `Discover full cast, crew, trailers, ratings and details for ${movieData.title}.`,
+            `${window.location.origin}/movie/${movieData.id}`
           );
         }
       } catch (err) {
@@ -156,6 +163,14 @@ export const MovieDetails: React.FC = () => {
       maximumFractionDigits: 0
     }).format(amount);
   };
+
+  // Check if this title is in our verified free catalog or generate streaming links
+  const matchingFreeMovie = FREE_MOVIES.find(
+    (m) => m.id === Number(id) || (movie && m.title.toLowerCase() === movie.title.toLowerCase())
+  );
+  const streamSources =
+    matchingFreeMovie?.freeSources ||
+    (movie ? getFreeStreamingLinksForMovie(movie.title, releaseYear) : []);
 
   return (
     <div className="pb-20">
@@ -259,6 +274,19 @@ export const MovieDetails: React.FC = () => {
                 <span>Watch Trailer</span>
               </button>
 
+              {matchingFreeMovie && streamSources.length > 0 && (
+                <a
+                  id="details-watch-free-btn"
+                  href={streamSources[0].url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-sm sm:text-base flex items-center gap-2 shadow-lg shadow-emerald-500/25 transition-all transform active:scale-95"
+                >
+                  <Tv className="w-4 h-4" />
+                  <span>Watch Free ({streamSources[0].platform})</span>
+                </a>
+              )}
+
               <button
                 id="details-toggle-watchlist-btn"
                 onClick={() => toggleWatchlist(movie)}
@@ -290,6 +318,62 @@ export const MovieDetails: React.FC = () => {
               <p className="text-sm sm:text-base text-neutral-300 leading-relaxed max-w-3xl">
                 {movie.overview || 'No synopsis provided for this title.'}
               </p>
+            </div>
+
+            {/* Free Streaming Providers & Search Links */}
+            <div className="pt-4 border-t border-white/10 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                    <Tv className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
+                      <span>Free Streaming Options</span>
+                      {matchingFreeMovie ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-black font-extrabold uppercase">
+                          Verified Free
+                        </span>
+                      ) : (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-neutral-300 font-semibold">
+                          Free Streaming Search
+                        </span>
+                      )}
+                    </h4>
+                    <p className="text-[11px] text-neutral-400">
+                      Watch legal streams on YouTube, Tubi TV, Pluto TV, or Plex without a paid subscription
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  to="/free-movies"
+                  className="text-xs font-semibold text-amber-400 hover:underline flex items-center gap-1"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>Browse All Free Movies</span>
+                </Link>
+              </div>
+
+              <FreeWatchBadges
+                sources={streamSources}
+                title={movie.title}
+                onPlayEmbed={(embedId, title) => {
+                  setSelectedTrailer({
+                    id: embedId,
+                    iso_639_1: 'en',
+                    iso_3166_1: 'US',
+                    key: embedId,
+                    name: `${title} - Full Movie`,
+                    site: 'YouTube',
+                    size: 1080,
+                    type: 'Feature',
+                    official: true,
+                    published_at: movie.release_date
+                  });
+                  setTrailerModalOpen(true);
+                }}
+              />
             </div>
           </div>
         </div>
