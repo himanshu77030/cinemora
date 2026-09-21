@@ -69,11 +69,17 @@ export const Profile: React.FC = () => {
               onClick={() => openAuthModal('login')}
               className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm transition-all shadow-lg shadow-amber-500/20"
             >
-              Sign In to Cinemora
+              Sign In
+            </button>
+            <button
+              onClick={() => openAuthModal('signup')}
+              className="w-full py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-sm border border-white/15 transition-all"
+            >
+              Create New Account
             </button>
             <Link
               to="/"
-              className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white font-semibold text-sm border border-white/10 transition-all inline-block text-center"
+              className="w-full py-2.5 rounded-xl bg-transparent hover:bg-white/5 text-neutral-400 hover:text-white font-medium text-xs transition-all inline-block text-center"
             >
               Browse Movies as Guest
             </Link>
@@ -567,7 +573,7 @@ export const Profile: React.FC = () => {
             <div>
               <h3 className="text-lg font-bold text-white font-display">Account Password & Security</h3>
               <p className="text-xs text-neutral-400">
-                Change your Cinemora account password (e.g. set to your preferred password like 77030@Himword).
+                Change your Cinemora account password to keep your profile secure.
               </p>
             </div>
           </div>
@@ -611,7 +617,7 @@ export const Profile: React.FC = () => {
                 minLength={6}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new password (e.g. 77030@Himword)"
+                placeholder="Enter new password"
                 className="w-full bg-[#161826] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-amber-400"
               />
             </div>

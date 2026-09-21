@@ -275,11 +275,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({ compact = false, onSearchS
           }}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder="Search movies, actors, genres... (Press '/' to focus)"
+          placeholder={compact ? "Search movies..." : "Search movies, actors, genres..."}
           autoComplete="off"
           spellCheck={false}
-          className={`w-full bg-[#12141e]/80 hover:bg-[#12141e]/95 text-white placeholder:text-neutral-400 rounded-xl pl-10 pr-16 border border-white/12 hover:border-white/20 focus:border-amber-500/70 focus:outline-none focus:ring-2 focus:ring-amber-500/25 backdrop-blur-md transition-all shadow-[inset_0_1px_3px_rgba(0,0,0,0.5)] ${
-            compact ? 'py-2 text-xs' : 'py-2.5 text-sm'
+          className={`w-full bg-white/[0.04] hover:bg-white/[0.07] focus:bg-[#0e101a] text-white placeholder:text-neutral-400 rounded-xl pl-9 pr-12 border border-white/10 hover:border-white/20 focus:border-amber-400/60 focus:outline-none focus:ring-1 focus:ring-amber-400/30 transition-all ${
+            compact ? 'py-1.5 text-xs' : 'py-2.5 text-sm'
           }`}
         />
 

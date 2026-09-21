@@ -102,10 +102,10 @@ export const UserProfileDropdown: React.FC = () => {
         <button
           id="taskbar-signin-btn"
           onClick={() => openAuthModal('login')}
-          className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 hover:text-amber-200 text-xs font-bold border border-amber-500/30 transition-all flex items-center gap-1.5 shadow-sm"
+          className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm shadow-amber-500/20 active:scale-95"
           title="Sign in to your account"
         >
-          <User className="w-3.5 h-3.5 text-amber-400" />
+          <User className="w-3.5 h-3.5 text-black stroke-[2.5]" />
           <span>Sign In</span>
         </button>
       </div>
@@ -512,7 +512,7 @@ export const UserProfileDropdown: React.FC = () => {
                     minLength={6}
                     value={newPass}
                     onChange={(e) => setNewPass(e.target.value)}
-                    placeholder="e.g. 77030@Himword"
+                    placeholder="Enter new password"
                     className="w-full bg-[#161826] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-amber-400"
                   />
                 </div>

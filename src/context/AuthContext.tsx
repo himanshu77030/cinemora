@@ -6,8 +6,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isGuest: boolean;
   isAuthModalOpen: boolean;
-  authModalTab: 'login' | 'forgot';
-  openAuthModal: (tab?: 'login' | 'forgot') => void;
+  authModalTab: 'login' | 'signup' | 'forgot';
+  openAuthModal: (tab?: 'login' | 'signup' | 'forgot') => void;
   closeAuthModal: () => void;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signup: (name: string, email: string, password: string, avatar?: string) => Promise<{ success: boolean; error?: string }>;
@@ -43,29 +43,21 @@ interface StoredUserAccount extends UserAccount {
   passwordHash: string;
 }
 
-// Initial demo user for instant test / trial
-const DEMO_USER: StoredUserAccount = {
-  id: 'usr_himanshu_demo',
-  name: 'Himanshu',
-  email: 'himanshu7703077046@gmail.com',
-  avatar: '🎬',
-  role: 'vip',
-  joinedDate: 'September 2026',
-  passwordHash: '77030@Himword',
-  preferences: {
-    favoriteGenres: [28, 878, 53], // Action, Sci-Fi, Thriller
-    preferredPlatform: 'All',
-    autoplayTrailers: true,
-    emailNotifications: false
-  }
-};
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // 1. Current logged-in user
   const [user, setUser] = useState<UserAccount | null>(() => {
     try {
       const stored = localStorage.getItem(CURRENT_USER_KEY);
-      return stored ? JSON.parse(stored) : null;
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Ensure no stale demo user with personal data is loaded
+        if (parsed.id?.includes('demo')) {
+          localStorage.removeItem(CURRENT_USER_KEY);
+          return null;
+        }
+        return parsed;
+      }
+      return null;
     } catch {
       return null;
     }
@@ -73,7 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // 2. Auth Modal controls
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalTab, setAuthModalTab] = useState<'login' | 'forgot'>('login');
+  const [authModalTab, setAuthModalTab] = useState<'login' | 'signup' | 'forgot'>('login');
   const [isGuest, setIsGuest] = useState<boolean>(() => {
     return localStorage.getItem(WELCOME_DISMISSED_KEY) === 'true';
   });
@@ -132,17 +124,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const data = localStorage.getItem(USERS_STORAGE_KEY);
       if (data) {
-        return JSON.parse(data);
+        const parsed: StoredUserAccount[] = JSON.parse(data);
+        const filtered = parsed.filter((u) => !u.id?.includes('demo'));
+        if (filtered.length !== parsed.length) {
+          localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(filtered));
+        }
+        return filtered;
       }
-      // Initialize with demo user
-      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify([DEMO_USER]));
-      return [DEMO_USER];
+      return [];
     } catch {
-      return [DEMO_USER];
+      return [];
     }
   };
 
-  const openAuthModal = (tab: 'login' | 'forgot' = 'login') => {
+  const openAuthModal = (tab: 'login' | 'signup' | 'forgot' = 'login') => {
     setAuthModalTab(tab);
     setIsAuthModalOpen(true);
   };
@@ -152,7 +147,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const continueAsGuest = () => {
+    setUser(null);
     setIsGuest(true);
+    localStorage.removeItem(CURRENT_USER_KEY);
     localStorage.setItem(WELCOME_DISMISSED_KEY, 'true');
     closeAuthModal();
   };

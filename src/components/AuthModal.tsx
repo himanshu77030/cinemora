@@ -3,18 +3,19 @@ import {
   X,
   Lock,
   Mail,
+  User,
   Eye,
   EyeOff,
-  Sparkles,
   ArrowRight,
   ShieldCheck,
   Film,
   KeyRound,
   CheckCircle2,
   AlertCircle,
-  ArrowLeft
+  ArrowLeft,
+  UserPlus
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, AVATAR_OPTIONS } from '../context/AuthContext';
 
 export const AuthModal: React.FC = () => {
   const {
@@ -23,15 +24,18 @@ export const AuthModal: React.FC = () => {
     openAuthModal,
     closeAuthModal,
     login,
+    signup,
     resetPassword,
     continueAsGuest
   } = useAuth();
 
   // Form states
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [selectedAvatar, setSelectedAvatar] = useState('🎬');
+  const [showPassword, setShowPassword] = useState(false);
 
   // UI status
   const [loading, setLoading] = useState(false);
@@ -55,6 +59,11 @@ export const AuthModal: React.FC = () => {
     openAuthModal('login');
   };
 
+  const handleSwitchToSignup = () => {
+    resetForm();
+    openAuthModal('signup');
+  };
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -74,6 +83,36 @@ export const AuthModal: React.FC = () => {
     }
   };
 
+  const handleSignupSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccessMessage(null);
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await signup(name, email, password, selectedAvatar);
+      if (!res.success) {
+        setError(res.error || 'Failed to create account.');
+      } else {
+        closeAuthModal();
+      }
+    } catch {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleResetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -81,6 +120,11 @@ export const AuthModal: React.FC = () => {
 
     if (password !== confirmPassword) {
       setError('New passwords do not match.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('New password must be at least 6 characters.');
       return;
     }
 
@@ -102,29 +146,12 @@ export const AuthModal: React.FC = () => {
     }
   };
 
-  const handleQuickDemo = async () => {
-    setError(null);
-    setLoading(true);
-    setEmail('himanshu7703077046@gmail.com');
-    setPassword('77030@Himword');
-    try {
-      const res = await login('himanshu7703077046@gmail.com', '77030@Himword');
-      if (res.success) {
-        closeAuthModal();
-      } else {
-        setError(res.error || 'Demo login failed');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
       {/* Modal Dialog Card */}
       <div
         id="auth-modal-dialog"
-        className="relative w-full max-w-md rounded-3xl bg-[#0f111c] border border-white/15 shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col"
+        className="relative w-full max-w-md rounded-3xl bg-[#0f111c] border border-white/15 shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Subtle decorative glow */}
@@ -158,13 +185,40 @@ export const AuthModal: React.FC = () => {
           </div>
 
           <h2 className="text-lg font-bold text-white font-display mt-1">
-            {authModalTab === 'login' ? 'Sign In to Cinemora' : 'Reset Your Password'}
+            {authModalTab === 'signup'
+              ? 'Sign Up'
+              : authModalTab === 'forgot'
+              ? 'Reset Password'
+              : 'Sign In'}
           </h2>
-          <p className="text-xs text-neutral-400 mt-0.5">
-            {authModalTab === 'login'
-              ? 'Enter your credentials to access watch history, saved movies, and user settings.'
-              : 'Enter your registered email and create a new secure password.'}
-          </p>
+
+          {/* Segmented Tab Switcher (Sign In vs Sign Up) */}
+          {authModalTab !== 'forgot' && (
+            <div className="mt-4 p-1 rounded-2xl bg-[#161826] border border-white/10 flex">
+              <button
+                type="button"
+                onClick={handleSwitchToLogin}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
+                  authModalTab === 'login'
+                    ? 'bg-amber-500 text-black shadow-md'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={handleSwitchToSignup}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
+                  authModalTab === 'signup'
+                    ? 'bg-amber-500 text-black shadow-md'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                Sign Up
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Form Content */}
@@ -186,7 +240,7 @@ export const AuthModal: React.FC = () => {
           )}
 
           {/* 1. SIGN IN FORM */}
-          {authModalTab === 'login' ? (
+          {authModalTab === 'login' && (
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
@@ -200,7 +254,7 @@ export const AuthModal: React.FC = () => {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="himanshu7703077046@gmail.com"
+                    placeholder="Write your email here"
                     className="w-full bg-[#161826] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-amber-400 transition-colors"
                   />
                 </div>
@@ -254,20 +308,156 @@ export const AuthModal: React.FC = () => {
                 )}
               </button>
 
-              {/* Fast 1-Click Demo Login */}
-              <div className="pt-2 border-t border-white/5">
+              <div className="text-center pt-2">
                 <button
                   type="button"
-                  onClick={handleQuickDemo}
-                  className="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-amber-300 flex items-center justify-center gap-2 transition-colors"
+                  onClick={handleSwitchToSignup}
+                  className="text-xs text-amber-400 hover:text-amber-300 font-semibold transition-colors"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  <span>One-Click Quick Sign In (Himanshu)</span>
+                  Create an account
                 </button>
               </div>
             </form>
-          ) : (
-            /* 2. RESET PASSWORD FORM */
+          )}
+
+          {/* 2. SIGN UP FORM (FOR FIRST-TIME VISITORS) */}
+          {authModalTab === 'signup' && (
+            <form onSubmit={handleSignupSubmit} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
+                  Your Full Name
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    id="signup-name-input"
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter your name"
+                    className="w-full bg-[#161826] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-amber-400 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    id="signup-email-input"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Write your email here"
+                    className="w-full bg-[#161826] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-amber-400 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
+                  Choose a Password (minimum 6 characters)
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    id="signup-password-input"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Create a secure password"
+                    className="w-full bg-[#161826] border border-white/10 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-amber-400 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <ShieldCheck className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    id="signup-confirm-password-input"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    minLength={6}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter your password"
+                    className="w-full bg-[#161826] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-amber-400 transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Avatar Picker */}
+              <div>
+                <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
+                  Pick Profile Icon
+                </label>
+                <div className="flex items-center gap-2">
+                  {AVATAR_OPTIONS.map((av) => (
+                    <button
+                      key={av.id}
+                      type="button"
+                      onClick={() => setSelectedAvatar(av.emoji)}
+                      className={`w-9 h-9 rounded-xl text-base flex items-center justify-center border transition-all ${
+                        selectedAvatar === av.emoji
+                          ? 'border-amber-400 bg-amber-500/20 scale-110 shadow'
+                          : 'border-white/10 bg-[#161826] hover:bg-white/5'
+                      }`}
+                      title={av.label}
+                    >
+                      {av.emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                id="signup-submit-btn"
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-[0.99] text-black font-extrabold text-sm transition-all shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
+              >
+                {loading ? (
+                  <span>Creating Account...</span>
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4" />
+                    <span>Create an account</span>
+                  </>
+                )}
+              </button>
+
+              <div className="text-center pt-2">
+                <button
+                  type="button"
+                  onClick={handleSwitchToLogin}
+                  className="text-xs text-amber-400 hover:text-amber-300 font-semibold transition-colors"
+                >
+                  Sign In
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* 3. RESET PASSWORD FORM */}
+          {authModalTab === 'forgot' && (
             <form onSubmit={handleResetSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
@@ -281,7 +471,7 @@ export const AuthModal: React.FC = () => {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="himanshu7703077046@gmail.com"
+                    placeholder="Write your email here"
                     className="w-full bg-[#161826] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-amber-400"
                   />
                 </div>
@@ -289,7 +479,7 @@ export const AuthModal: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
-                  New Password (e.g. 77030@Himword)
+                  New Password
                 </label>
                 <div className="relative">
                   <KeyRound className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -354,19 +544,16 @@ export const AuthModal: React.FC = () => {
             </form>
           )}
 
-          {/* Continue as Guest (Clear action so visitors can explore freely) */}
-          <div className="pt-3 border-t border-white/5 flex flex-col items-center gap-1.5 text-center">
+          {/* Continue as Guest */}
+          <div className="pt-3 border-t border-white/5 flex justify-center">
             <button
               id="auth-continue-guest-btn"
               type="button"
               onClick={continueAsGuest}
-              className="text-xs font-semibold text-neutral-400 hover:text-white transition-colors underline decoration-dotted underline-offset-4"
+              className="text-xs font-semibold text-neutral-400 hover:text-white transition-colors"
             >
-              Continue as Guest (No login required)
+              Continue as Guest
             </button>
-            <p className="text-[11px] text-neutral-500">
-              Browse movies, search titles, watch trailers, and stream free anytime.
-            </p>
           </div>
         </div>
       </div>
