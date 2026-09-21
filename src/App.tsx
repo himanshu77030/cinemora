@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Link } from 'react-router-dom';
 import { WatchlistProvider } from './context/WatchlistContext';
+import { AuthProvider } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
+import { AuthModal } from './components/AuthModal';
 import { Home } from './pages/Home';
 import { Movies } from './pages/Movies';
 import { MovieDetails } from './pages/MovieDetails';
@@ -15,6 +17,7 @@ import { Trending } from './pages/Trending';
 import { TopRated } from './pages/TopRated';
 import { Watchlist } from './pages/Watchlist';
 import { FreeMovies } from './pages/FreeMovies';
+import { Profile } from './pages/Profile';
 import { Film, Home as HomeIcon } from 'lucide-react';
 
 const ScrollToTop: React.FC = () => {
@@ -52,32 +55,36 @@ const NotFound: React.FC = () => {
 
 export default function App() {
   return (
-    <WatchlistProvider>
-      <BrowserRouter>
-        <ScrollToTop />
-        <div className="min-h-screen flex flex-col bg-[#0b0c10] text-[#f0f1f5] font-sans selection:bg-amber-500 selection:text-black">
-          <Navbar />
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/free-movies" element={<FreeMovies />} />
-              <Route path="/free" element={<FreeMovies />} />
-              <Route path="/movies" element={<Movies />} />
-              <Route path="/movie/:id" element={<MovieDetails />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/genres" element={<Genres />} />
-              <Route path="/genre/:genreId" element={<GenreMovies />} />
-              <Route path="/years" element={<Years />} />
-              <Route path="/year/:year" element={<YearMovies />} />
-              <Route path="/trending" element={<Trending />} />
-              <Route path="/top-rated" element={<TopRated />} />
-              <Route path="/watchlist" element={<Watchlist />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </BrowserRouter>
-    </WatchlistProvider>
+    <AuthProvider>
+      <WatchlistProvider>
+        <BrowserRouter>
+          <ScrollToTop />
+          <AuthModal />
+          <div className="min-h-screen flex flex-col bg-[#0b0c10] text-[#f0f1f5] font-sans selection:bg-amber-500 selection:text-black">
+            <Navbar />
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/free-movies" element={<FreeMovies />} />
+                <Route path="/free" element={<FreeMovies />} />
+                <Route path="/movies" element={<Movies />} />
+                <Route path="/movie/:id" element={<MovieDetails />} />
+                <Route path="/search" element={<Search />} />
+                <Route path="/genres" element={<Genres />} />
+                <Route path="/genre/:genreId" element={<GenreMovies />} />
+                <Route path="/years" element={<Years />} />
+                <Route path="/year/:year" element={<YearMovies />} />
+                <Route path="/trending" element={<Trending />} />
+                <Route path="/top-rated" element={<TopRated />} />
+                <Route path="/watchlist" element={<Watchlist />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        </BrowserRouter>
+      </WatchlistProvider>
+    </AuthProvider>
   );
 }

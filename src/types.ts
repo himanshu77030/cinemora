@@ -129,3 +129,25 @@ export interface FreeMovie extends Movie {
   featuredFree?: boolean;
 }
 
+export interface WatchedHistoryItem {
+  movie: Movie;
+  watchedAt: number; // timestamp
+}
+
+export interface UserPreferences {
+  favoriteGenres: number[];
+  preferredPlatform: string;
+  autoplayTrailers: boolean;
+  emailNotifications: boolean;
+}
+
+export interface UserAccount {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  role: 'member' | 'vip' | 'admin';
+  joinedDate: string;
+  preferences: UserPreferences;
+}
+

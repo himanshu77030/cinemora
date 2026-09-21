@@ -29,6 +29,7 @@ import {
   getImageUrl
 } from '../services/tmdb';
 import { useWatchlist } from '../context/WatchlistContext';
+import { useAuth } from '../context/AuthContext';
 import { MovieCarousel } from '../components/MovieCarousel';
 import { MovieDetailsSkeleton } from '../components/LoadingSkeleton';
 import { TrailerModal } from '../components/TrailerModal';
@@ -51,6 +52,7 @@ export const MovieDetails: React.FC = () => {
   const [copied, setCopied] = useState(false);
 
   const { isInWatchlist, toggleWatchlist, addToRecentlyViewed } = useWatchlist();
+  const { addToWatchHistory } = useAuth();
 
   useEffect(() => {
     if (!id) return;
@@ -76,6 +78,7 @@ export const MovieDetails: React.FC = () => {
           setSimilar(similarData);
           setRecommended(recommendedData);
           addToRecentlyViewed(movieData);
+          addToWatchHistory(movieData);
 
           const primaryTrailer =
             videosData.find((v) => v.type === 'Trailer' && v.official) ||
