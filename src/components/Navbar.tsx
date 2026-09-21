@@ -10,20 +10,15 @@ import {
   Grid,
   Menu,
   X,
-  Key,
   Search
 } from 'lucide-react';
 import { SearchBar } from './SearchBar';
 import { useWatchlist } from '../context/WatchlistContext';
-import { ApiKeyModal } from './ApiKeyModal';
-import { hasApiKey } from '../services/tmdb';
 
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
-  const [apiKeyActive, setApiKeyActive] = useState(hasApiKey());
 
   const location = useLocation();
   const { watchlist } = useWatchlist();
@@ -125,20 +120,6 @@ export const Navbar: React.FC = () => {
                 </span>
               )}
             </Link>
-
-            {/* TMDB API Key settings button */}
-            <button
-              id="open-apikey-modal-btn"
-              onClick={() => setApiKeyModalOpen(true)}
-              className={`p-2 rounded-xl border transition-colors flex items-center justify-center flex-shrink-0 ${
-                apiKeyActive
-                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25'
-                  : 'bg-white/5 border-white/5 text-neutral-400 hover:text-amber-400 hover:bg-white/10'
-              }`}
-              title={apiKeyActive ? 'Live TMDB API active' : 'Configure TMDB API Key'}
-            >
-              <Key className="w-4 h-4" />
-            </button>
 
             {/* Mobile Menu Toggle Button */}
             <button
@@ -261,12 +242,6 @@ export const Navbar: React.FC = () => {
           )}
         </NavLink>
       </div>
-
-      <ApiKeyModal
-        isOpen={apiKeyModalOpen}
-        onClose={() => setApiKeyModalOpen(false)}
-        onKeyUpdated={() => setApiKeyActive(hasApiKey())}
-      />
     </>
   );
 };

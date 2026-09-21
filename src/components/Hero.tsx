@@ -6,6 +6,7 @@ import { getBackdropUrl, getImageUrl, getMovieVideos } from '../services/tmdb';
 import { GENRE_MAP } from '../data/genres';
 import { useWatchlist } from '../context/WatchlistContext';
 import { TrailerModal } from './TrailerModal';
+import { HeroSkeleton } from './LoadingSkeleton';
 
 interface HeroProps {
   featuredMovies: Movie[];
@@ -47,15 +48,7 @@ export const Hero: React.FC<HeroProps> = ({ featuredMovies, loading = false }) =
   };
 
   if (loading || !activeMovie) {
-    return (
-      <div className="relative w-full h-[70vh] min-h-[500px] max-h-[800px] bg-[#0e1017] animate-pulse flex items-end p-8">
-        <div className="max-w-xl space-y-4">
-          <div className="h-6 w-32 bg-white/10 rounded"></div>
-          <div className="h-10 w-96 bg-white/10 rounded"></div>
-          <div className="h-4 w-full bg-white/10 rounded"></div>
-        </div>
-      </div>
-    );
+    return <HeroSkeleton />;
   }
 
   const releaseYear = activeMovie.release_date ? activeMovie.release_date.split('-')[0] : '';

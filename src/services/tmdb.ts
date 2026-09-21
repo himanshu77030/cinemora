@@ -2,33 +2,11 @@ import { Movie, MovieCredits, MovieVideo, TrendingActor, FilterOptions, TimeWind
 import { CURATED_MOVIES, MOCK_CREDITS, MOCK_VIDEOS, TRENDING_ACTORS } from '../data/mockMovies';
 import { TMDB_GENRES } from '../data/genres';
 
-const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
 // In-memory cache for fast snappy navigation
 const apiCache = new Map<string, { timestamp: number; data: any }>();
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
-
-export const getApiKey = (): string => {
-  const customKey = localStorage.getItem('cinemora_tmdb_key');
-  if (customKey && customKey.trim()) {
-    return customKey.trim();
-  }
-  return (import.meta.env.VITE_TMDB_API_KEY as string) || '';
-};
-
-export const setCustomApiKey = (key: string) => {
-  if (key.trim()) {
-    localStorage.setItem('cinemora_tmdb_key', key.trim());
-  } else {
-    localStorage.removeItem('cinemora_tmdb_key');
-  }
-  apiCache.clear();
-};
-
-export const hasApiKey = (): boolean => {
-  return Boolean(getApiKey());
-};
 
 export const getImageUrl = (path: string | null | undefined, size: 'w200' | 'w300' | 'w500' | 'w780' | 'original' = 'w500'): string => {
   if (!path) {
@@ -51,12 +29,8 @@ export const getBackdropUrl = (path: string | null | undefined, size: 'w780' | '
 };
 
 async function fetchFromTMDB<T>(endpoint: string, params: Record<string, string | number | undefined> = {}): Promise<T | null> {
-  const apiKey = getApiKey();
-  if (!apiKey) return null;
-
-  const url = new URL(`${BASE_URL}${endpoint}`);
-  url.searchParams.append('api_key', apiKey);
-  url.searchParams.append('include_adult', 'false');
+  const url = new URL('/api/tmdb', window.location.origin);
+  url.searchParams.append('endpoint', endpoint);
 
   Object.entries(params).forEach(([key, val]) => {
     if (val !== undefined && val !== null && val !== '') {
@@ -71,16 +45,21 @@ async function fetchFromTMDB<T>(endpoint: string, params: Record<string, string 
   }
 
   try {
-    const response = await fetch(url.toString());
+    const response = await fetch(url.toString(), {
+      headers: {
+        Accept: 'application/json'
+      }
+    });
     if (!response.ok) {
-      console.warn(`TMDB API request failed with status: ${response.status}`);
       return null;
     }
     const data = await response.json();
+    if (data && (data.fallback || data.error)) {
+      return null;
+    }
     apiCache.set(cacheKey, { timestamp: Date.now(), data });
     return data as T;
-  } catch (err) {
-    console.error('TMDB Network error:', err);
+  } catch {
     return null;
   }
 }
@@ -257,10 +236,9 @@ export async function searchMovies(
   page = 1,
   options: FilterOptions = {}
 ): Promise<{ results: Movie[]; totalPages: number; totalResults: number }> {
-  const apiKey = getApiKey();
   const trimmed = query.trim();
 
-  if (apiKey && trimmed) {
+  if (trimmed) {
     const res = await fetchFromTMDB<{ results: Movie[]; total_pages: number; total_results: number }>(`/search/movie`, {
       query: trimmed,
       page,

@@ -7,6 +7,7 @@ import { MovieGridSkeleton } from './LoadingSkeleton';
 interface MovieGridProps {
   movies: Movie[];
   loading?: boolean;
+  skeletonCount?: number;
   emptyTitle?: string;
   emptyMessage?: string;
   showRank?: boolean;
@@ -16,13 +17,14 @@ interface MovieGridProps {
 export const MovieGrid: React.FC<MovieGridProps> = ({
   movies,
   loading = false,
+  skeletonCount = 12,
   emptyTitle = 'No movies discovered',
   emptyMessage = 'Try adjusting your filters, selecting a different genre, or searching for another title.',
   showRank = false,
   onResetFilters
 }) => {
   if (loading) {
-    return <MovieGridSkeleton count={12} />;
+    return <MovieGridSkeleton count={skeletonCount} showRank={showRank} />;
   }
 
   if (!movies || movies.length === 0) {

@@ -85,8 +85,8 @@ export const MovieCarousel: React.FC<MovieCarouselProps> = ({
       >
         {loading
           ? Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="w-[160px] sm:w-[200px] md:w-[220px] flex-shrink-0">
-                <MovieCardSkeleton />
+              <div key={i} className="w-[155px] sm:w-[195px] md:w-[215px] flex-shrink-0">
+                <MovieCardSkeleton showRank={showRank} />
               </div>
             ))
           : movies.map((movie, index) => (
